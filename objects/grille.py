@@ -159,8 +159,3 @@ print(g1)
 
 print(g1)
 print(g1.gagne())
-
-'ichleeb le jaune, jaune, jaune'
-'ichleeb le vert, vert, vert'
-'ichleeb le bleu canard'
-'j aime tout sauf le noir'

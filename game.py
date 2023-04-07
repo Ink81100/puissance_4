@@ -17,4 +17,3 @@ while play:
 
 pygame.quit()
 
-'test'
