@@ -9,6 +9,7 @@ class Grille():
         Args:
             largeur (int): Largeur de la grille.
             hauteur (int): Hauteur de la grille.
+            victoire (int): nombre de jetons necessaire pour gagner
 
         Attributes:
             tab (list): Grille de jeu représentée sous la forme d'une liste de listes.
