@@ -16,3 +16,5 @@ while play:
             play = False
 
 pygame.quit()
+
+'test'
