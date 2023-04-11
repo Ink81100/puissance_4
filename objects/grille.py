@@ -1,8 +1,11 @@
 from jeton import Jeton
+import pygame 
+from pygame.locals import *
+
 
 class Grille():
 
-    def __init__(self,largeur = 7,hauteur = 6,victoire = 4):
+    def __init__(self,screen,largeur = 7,hauteur = 6,victoire = 4,):
         """
         Initialise une grille de jeu.
 
@@ -10,6 +13,7 @@ class Grille():
             largeur (int): Largeur de la grille.
             hauteur (int): Hauteur de la grille.
             victoire (int): nombre de jetons necessaire pour gagner
+            screen: écran de pygame
 
         Attributes:
             tab (list): Grille de jeu représentée sous la forme d'une liste de listes.
@@ -19,6 +23,12 @@ class Grille():
             2 : jeton du joueur 2
             largeur (int): Largeur du tableau
             hauteur (int): Hauteur du tableau 
+            victoire (int): Nombre de jeton pour une victoire
+            screen (pygame.screen): Ecran du jeu 
+            marge (int): marge de la grille sur l'écran
+            facteur_redim(float): facteur dee redimension appliquer à la grille
+                                dans le cas où elle dépasserais de la fenêtre
+            carreau (pygame.surface): sprite d'un carreau d la grille
         """
         ###Vérification des paramètres
         #Vérification du type
@@ -35,10 +45,32 @@ class Grille():
         self.largeur = largeur
         self.hauteur = hauteur 
         self.victoire = victoire
+        self.screen = screen
 
-        #Création de la grille
-        self.tab = [[Jeton() for _ in range(largeur)] for _ in range(hauteur)]
+        #Sprite de la grille
+        Grille.sprite = pygame.image.load('data/image/jetons/CaseGrille.png')
         
+        #facteur de rétrécissement
+       
+        
+        self.l_f = int(min(0.7 * self.screen.get_width()//self.largeur,
+                                0.7 * self.screen.get_height()//self.hauteur))
+
+        self.marge = (int((self.screen.get_width() - (self.l_f * self.largeur))//2),
+                      int((self.screen.get_height() - (self.l_f * self.hauteur))//2))
+
+        self.carreau = pygame.transform.scale(Grille.sprite,
+                                              (self.l_f,self.l_f))
+
+        #Création de la grille de jeton
+        self.tab = [[Jeton(screen,0,self.l_f) for _ in range(self.largeur)]
+                    for _ in range(self.hauteur)]
+        
+    def size(self) -> tuple:
+        """Renvois la taille """
+        return (self.carreau.get_width(),
+                self.carreau.get_height())
+
     def hauteur_tab(self) -> int:
         """renvois la hauteur de la grille"""
         return self.hauteur
@@ -67,6 +99,7 @@ class Grille():
             if self.pleine(i):
                 return True
         return False
+
 
     def ajout_jeton(self,y,jeton = 0):
         """
@@ -108,6 +141,17 @@ class Grille():
 
     def gagne(self) -> tuple:
         """
+        Vérifie si il y une victoire
+
+        Returns:
+            tuple: len = 2 
+                [0] (bool):
+                    True:Il y une victoire
+                    False:Il n'y pas de victoire
+
+                [1] (int):
+                    1:J1 gagnant
+                    2:J2 gagnant
         """
         ###Vérification des différent cas de victoires
         #Ligne
@@ -135,13 +179,26 @@ class Grille():
                         if (self.tab[i][j].type() == self.tab[i+1][j+1].type() and self.tab[i+1][j+1].type() == self.tab[i+2][j+2].type() and self.tab[i+2][j+2].type() == self.tab[i+3][j+3].type() and self.tab[i][j].type() != 0):
                             return (True,self.tab[i][j].type())
 
+    def display(self):
+        """Affiche la grille et les jeton à l'intérieur"""
+
+        #Affichage de la grille            
+        for x in range(self.marge[0],self.largeur_tab()*self.size()[0] + self.marge[0],self.size()[0]):
+            for y in range(self.marge[1],self.hauteur_tab()*self.size()[1] + self.marge[1],self.size()[1]):
+                self.screen.blit(self.carreau, (x, y))
+        
+        #Affichage des jetons
+        for i in range(self.hauteur_tab()):
+            for j in range(self.largeur_tab()):
+                self.tab[i][j].display(self.marge[0] + j * self.size()[0],
+                             self.marge[1] + i * self.size()[1])
+
     def __str__(self):
         """
         Renvoie une représentation de la grille sous forme de chaîne de caractères.
 
         Returns:
             str: la grille sous forme de tableau affichable dans la console.
-
         Variables:
             tab_str (str): La chaîne de caractères stockant la grille sous forme de tableau.
         """
@@ -153,10 +210,3 @@ class Grille():
             tab_str += (str(temp_l)+'\n')#On concationne  pour les afficher comme un tableau dans la console
             temp_l = []
         return str(tab_str)
-    
-g1 = Grille(
-)
-print(g1)
-
-print(g1)
-print(g1.gagne())
