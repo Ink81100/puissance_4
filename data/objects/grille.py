@@ -1,19 +1,24 @@
 from data.objects.jeton import Jeton
 import pygame 
-from pygame.locals import *
+import math
 
 
 class Grille():
 
-    def __init__(self,screen,largeur = 7,hauteur = 6,victoire = 4,):
+    def __init__(self,screen,taille = (7,6),victoire = 4,
+                 sprite_1 = pygame.image.load('data/image/jetons/jeton_Jaune.png'),
+                 sprite_2 = pygame.image.load('data/image/jetons/jeton_Rouge.png')):
         """
         Initialise une grille de jeu.
 
         Args:
-            largeur (int): Largeur de la grille.
-            hauteur (int): Hauteur de la grille.
+            taille (tuple len = 2):
+                0 (int > 4):largeur
+                1 (int > 4):hauteur
             victoire (int): nombre de jetons necessaire pour gagner
-            screen: écran de pygame
+            screen (pygame.display): écran du jeu
+            sprite_1 (pygame.surface): sprite du jeton du joueur 1
+            sprite_2 (pygame.surface): sprite du jeton du joueur 2
 
         Attributes:
             tab (list): Grille de jeu représentée sous la forme d'une liste de listes.
@@ -32,20 +37,24 @@ class Grille():
         """
         ###Vérification des paramètres
         #Vérification du type
-        assert type(largeur) == int,'largeur doît être un entier' 
-        assert type(hauteur) == int,'hauteur doît être un entier'
+        assert type(taille) == tuple,'taille pas un tuple'
+        assert type(taille[0]) == int,'largeur doît être un entier' 
+        assert type(taille[1]) == int,'largeur doît être un entier' 
         assert type(victoire) == int, 'Victoire doit être un entier'
         
         #Vérification de la valeur
-        assert largeur >= 4,'largeur < 4' 
-        assert hauteur >= 4,'hauteur < 4'
+        assert taille[0] >= 4,'largeur < 4' 
+        assert taille[1] >= 4,'hauteur < 4'
         assert victoire >= 4,'hauteur < 4'
 
         #Stockage des arguments en attribut
-        self.largeur = largeur
-        self.hauteur = hauteur 
+        self.taille = taille 
         self.victoire = victoire
         self.screen = screen
+        self.sprite_1 = sprite_1
+        self.sprite_2 = sprite_2
+        
+        
 
         #Sprite de la grille
         Grille.sprite = pygame.image.load('data/image/jetons/CaseGrille.png')
@@ -53,32 +62,34 @@ class Grille():
         #facteur de rétrécissement
        
         
-        self.l_f = int(min(0.7 * self.screen.get_width()//self.largeur,
-                                0.7 * self.screen.get_height()//self.hauteur))
+        self.l_f = math.ceil(min(0.7 * self.screen.get_width()/self.taille[0],
+                    0.7 * self.screen.get_height()/self.taille[1]))
+        
+        print(self.l_f,'self.l_f')
 
-        self.marge = (int((self.screen.get_width() - (self.l_f * self.largeur))//2),
-                      int((self.screen.get_height() - (self.l_f * self.hauteur))//2))
+        self.marge = (math.ceil((self.screen.get_width() - (self.l_f * self.taille[0]))//2),
+                      math.ceil((self.screen.get_height() - (self.l_f * self.taille[1]))//2))
 
         self.carreau = pygame.transform.scale(Grille.sprite,
                                               (self.l_f,self.l_f))
 
         #Création de la grille de jeton
-        self.tab = [[Jeton(screen,0,self.l_f) for _ in range(self.largeur)]
-                    for _ in range(self.hauteur)]
+        self.tab = [[Jeton(screen,0,self.l_f,self.marge[0],self.sprite_1,self.sprite_2) for _ in range(self.taille[0])]
+                    for _ in range(self.taille[1])]
         
     def size(self) -> tuple:
         """Renvois la taille """
         return (self.carreau.get_width(),
                 self.carreau.get_height())
-
-    def hauteur_tab(self) -> int:
-        """renvois la hauteur de la grille"""
-        return self.hauteur
     
     def largeur_tab(self) -> int:
         """renvois la largeur de la grille"""
-        return self.largeur
+        return self.taille[0]
     
+    def hauteur_tab(self) -> int:
+        """renvois la hauteur de la grille"""
+        return self.taille[1]
+
     def pleine(self,colonne) -> bool:
         """vérifie si la colone est pleine oui où non"""
         for ligne in range(self.hauteur_tab()):
@@ -95,11 +106,10 @@ class Grille():
                 True: la grille est pleine
                 False: la grille n'est pas pleine
         """
-        for i in range(self.largeur):
-            if self.pleine(i):
-                return True
-        return False
-
+        for i in range(self.largeur_tab()):
+            if self.pleine(i) != True:
+                return False
+        return True
 
     def ajout_jeton(self,y,jeton = 0):
         """

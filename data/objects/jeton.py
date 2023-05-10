@@ -1,8 +1,11 @@
 import pygame
+import math
 
 class Jeton():
 
-    def __init__(self,screen,sorte = 0,carreau_l = 72,marge = 40) -> None:
+    def __init__(self,screen,sorte = 0,carreau_l = 72,marge = 40,
+                 sprite_1 = pygame.image.load('data/image/jetons/jeton_Jaune.png'),
+                 sprite_2 = pygame.image.load('data/image/jetons/jeton_Rouge.png')) -> None:
         """
         Iniltialise un jeton
 
@@ -21,15 +24,17 @@ class Jeton():
         ###Vérification des paramètres
         assert type(sorte) == int,'sorte du jeton de type incorrect(%s)' % sorte
 
-        ###
+        ###Attributs
         self.sorte = sorte
         self.screen = screen
         self.carreau_l = carreau_l
         self.marge = marge
-        self.sprite = pygame.image.load('data/image/jetons/jeton%s.png' % self.sorte)
+        self.sprite = pygame.image.load('data/image/jetons/BlancRond.png')
         self.sprite_f = pygame.transform.scale(self.sprite,(((self.carreau_l * self.sprite.get_width())//72),
                                                ((self.carreau_l *self.sprite.get_height())//72)))
-        
+        #Sprites des jetons
+        self.sprite_1 = sprite_1
+        self.sprite_2 = sprite_2
 
     def type(self) -> int:
         """Renvois le type du jeton"""
@@ -48,9 +53,15 @@ class Jeton():
         #Vérification des valeurs
         assert n_type == 0 or n_type == 1 or n_type == 2,'Valeur du nouveau type du jeton incorrect'
         self.sorte = n_type
-        self.sprite = pygame.image.load('data/image/jetons/jeton%s.png' % self.sorte)
-        self.sprite_f = pygame.transform.scale(self.sprite,(((self.carreau_l *self.sprite.get_width())//72),
-                                               ((self.carreau_l *self.sprite.get_height())//72)))
+        if self.sorte == 1:
+            self.sprite = self.sprite_1
+        elif self.sorte == 2:
+            self.sprite = self.sprite_2
+        else:
+            self.sprite = pygame.image.load('data/image/jetons/BlancRond.png')
+
+        self.sprite_f = pygame.transform.scale(self.sprite,(math.ceil((self.carreau_l *self.sprite.get_width())/72),
+                                               math.ceil((self.carreau_l *self.sprite.get_height())/72)))
 
     def size(self) -> tuple:
         """Renvois la taille du jeton"""
@@ -58,5 +69,6 @@ class Jeton():
 
     def display(self,x,y):
         """Affiche le jeton"""
-        self.screen.blit(self.sprite_f,(x + ((self.carreau_l//self.size()[0]) * (4)),
-                                        y + ((self.carreau_l//self.size()[1]) * (3))))
+        if self.sorte != 0:
+            self.screen.blit(self.sprite_f,(x + ((self.carreau_l - self.size()[0])/2),
+                                            y + ((self.carreau_l - self.size()[0])/2)))
